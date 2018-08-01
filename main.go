@@ -188,7 +188,7 @@ func (t *AugmentedTask) ExporterInformation() []*PrometheusTaskInfo {
 			continue
 		}
 
-		if *t.LaunchType != "FARGATE" {
+		if len(i.NetworkBindings) > 0 {
 			for _, nb := range i.NetworkBindings {
 				if int(*nb.ContainerPort) == exporterPort {
 					hostPort = *nb.HostPort
