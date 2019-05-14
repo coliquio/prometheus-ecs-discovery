@@ -233,7 +233,7 @@ func (t *AugmentedTask) ExporterInformation() []*PrometheusTaskInfo {
 				Labels:  labels,
 			})
 		} else {
-			for path := range exporterPaths {
+			for _, path := range exporterPaths {
 				labelsCopy := labels
 				labelsCopy = append(labelsCopy,
 					yaml.MapItem{"__metrics_path__", path},
