@@ -203,7 +203,6 @@ func (t *AugmentedTask) ExporterInformation() []*PrometheusTaskInfo {
 			hostPort = int64(exporterPort)
 		}
 
-
 		if exporterServerName, ok = d.DockerLabels["PROMETHEUS_EXPORTER_SERVER_NAME"]; ok {
 			host = strings.TrimRight(*exporterServerName, "/")
 		} else {
@@ -223,17 +222,31 @@ func (t *AugmentedTask) ExporterInformation() []*PrometheusTaskInfo {
 			yaml.MapItem{"docker_image", *d.Image},
 		)
 
+		var exporterPaths []string
 		if exporterPath, ok = d.DockerLabels["PROMETHEUS_EXPORTER_PATH"]; ok {
-			labels = append(labels,
-				yaml.MapItem{"__metrics_path__", *exporterPath},
-			)
+			exporterPaths = strings.Split(*exporterPath, "|")
 		}
 
-		ret = append(ret, &PrometheusTaskInfo{
-			Targets: []string{fmt.Sprintf("%s:%d", host, hostPort)},
-			Labels:  labels,
-		})
+		if len(exporterPaths) == 0 {
+			ret = append(ret, &PrometheusTaskInfo{
+				Targets: []string{fmt.Sprintf("%s:%d", host, hostPort)},
+				Labels:  labels,
+			})
+		} else {
+			for _, path := range exporterPaths {
+				labelsCopy := labels
+				labelsCopy = append(labelsCopy,
+					yaml.MapItem{"__metrics_path__", path},
+				)
+
+				ret = append(ret, &PrometheusTaskInfo{
+					Targets: []string{fmt.Sprintf("%s:%d", host, hostPort)},
+					Labels:  labelsCopy,
+				})
+			}
+		}
 	}
+
 	return ret
 }
 
