@@ -139,13 +139,21 @@ func (t *AugmentedTask) ExporterInformation() []*PrometheusTaskInfo {
 		if t.EC2Instance == nil {
 			return ret
 		}
-		if len(t.EC2Instance.NetworkInterfaces) == 0 {
-			return ret
-		}
-		for _, iface := range t.EC2Instance.NetworkInterfaces {
-			if iface.PrivateIpAddress != nil && *iface.PrivateIpAddress != "" {
-				ip = *iface.PrivateIpAddress
-				break
+		// if there is a default address, use that
+		if t.EC2Instance.PrivateIpAddress != nil && *t.EC2Instance.PrivateIpAddress != "" {
+			ip = *t.EC2Instance.PrivateIpAddress
+		} else {
+			// if there was no default address, try to find out from list
+			if len(t.EC2Instance.NetworkInterfaces) == 0 {
+				return ret
+			}
+			// note: this is not optimal, we don't know if the first from this list is the right one
+			//       idea for future: maybe look for the one with lowest Attachment.DeviceIndex
+			for _, iface := range t.EC2Instance.NetworkInterfaces {
+				if iface.PrivateIpAddress != nil && *iface.PrivateIpAddress != "" {
+					ip = *iface.PrivateIpAddress
+					break
+				}
 			}
 		}
 		if ip == "" {
