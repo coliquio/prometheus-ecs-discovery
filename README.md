@@ -1,5 +1,7 @@
 # Prometheus Amazon ECS discovery
 
+[Docker Image](https://hub.docker.com/repository/docker/coliquiode/prometheus-ecs-discovery)
+
 Prometheus has native Amazon EC2 discovery capabilities, but it does
 not have the capacity to discover ECS instances that can be scraped
 by Prometheus.  This program is a Prometheus File Service Discovery
